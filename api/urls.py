@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register', views.RegisterAPIView.as_view(), name='register'),
     path('host-hackathon', views.HostHackathonAPIView.as_view(), name='host-hackathon'),
+    path('participate-hackathon', views.PartcipantHackathonAPIView.as_view(), name='participate-hackathon'),
     # path('login', views.LoginAPIView.as_view(), name='login'),
     
 ]

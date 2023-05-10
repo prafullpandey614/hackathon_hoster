@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Hackathon, Profile
 from django.contrib.auth.models import User
-from .serializers import HackathonSerializer, ProfileSerializer,UserSerializer
+from .serializers import HackathonSerializer, HackthonParticipantSerializer, ProfileSerializer,UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from .models import HackathonParticipant
+from django.shortcuts import get_object_or_404
 # from rest_framework_simplejwt.views import ObtainJSONWebToken
 from django.contrib.auth import login,authenticate
 # Create your views here.
@@ -26,7 +28,7 @@ class RegisterAPIView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            # profile = Profile.objects.create(user=user)
+            profile = Profile.objects.create(user=user)
             token = RefreshToken.for_user(user=user)
             response_data = {
                 'user': serializer.data,
@@ -38,6 +40,25 @@ class RegisterAPIView(CreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class HostHackathonAPIView(CreateAPIView):
     queryset = Hackathon.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
     serializer_class = HackathonSerializer
+    def perform_create(self, serializer):
+        user = Profile.objects.get(user=self.request.user)
+        serializer.save(organizer=user)
+
+class PartcipantHackathonAPIView(CreateAPIView):
+    queryset = HackathonParticipant.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = HackthonParticipantSerializer
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        hackathon_id = self.request.data.get('hackathon')
+        context['hackathon'] = get_object_or_404(Hackathon, pk=hackathon_id)
+        return context
+    
+    def perform_create(self, serializer):
+        hackathon = self.get_serializer_context()['hackathon']
+        
+        participant = Profile.objects.get(user=self.request.user)
+        serializer.save(participant=participant, hackathon=hackathon)
     
