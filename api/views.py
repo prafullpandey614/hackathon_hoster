@@ -1,5 +1,6 @@
+from typing import List
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView,ListAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView,RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .models import HackathonParticipant
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 # from rest_framework_simplejwt.views import ObtainJSONWebToken
 from django.contrib.auth import login,authenticate
 
@@ -97,3 +99,18 @@ class MyRegistrationsAPIView(ListAPIView):
         user_profile = Profile.objects.get(user = self.request.user)
         queryset = HackathonParticipant.objects.filter(participant=user_profile)
         return queryset    
+
+class MySubmissionAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SubmissionSerializer
+    def  get_queryset(self):
+        hackathon_id = self.request.query_params.get('id')
+        if hackathon_id is None:
+            raise Http404
+        user_profile = Profile.objects.get(user=self.request.user)
+        try:
+            submission = Submission.objects.filter(hackathon__id=hackathon_id, participant=user_profile)
+        except Submission.DoesNotExist:
+            raise Http404
+        self.check_object_permissions(self.request, submission)
+        return submission

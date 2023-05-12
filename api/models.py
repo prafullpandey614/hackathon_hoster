@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.core.validators import FileExtensionValidator, URLValidator
 
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
@@ -46,7 +47,9 @@ class HackathonParticipant(models.Model):
         return f"{self.hackathon}  {self.participant}"
 
 class Submission(models.Model):
-    file = models.FileField(upload_to="media/submission_files/",blank=True,null=True)
+    # file = models.FileField(upload_to="media/submission_files/",blank=True,null=True)
+    file = models.FileField(upload_to='submissions/', validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'])], blank=True, null=True)
+
     link_submission = models.URLField(default="https://example.com",blank=True,null=True)
     participant = models.ForeignKey(Profile,on_delete=models.CASCADE)
     hackathon = models.ForeignKey(Hackathon,on_delete = models.CASCADE)

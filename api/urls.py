@@ -15,9 +15,9 @@ urlpatterns = [
     path('register', views.RegisterAPIView.as_view(), name='register'),
     path('host-hackathon', views.HostHackathonAPIView.as_view(), name='host-hackathon'),
     path('participate-hackathon', views.PartcipantHackathonAPIView.as_view(), name='participate-hackathon'),
-    path('submit-solution',views.SubmitYourSolutionAPIView.as_view(),name="submission"),
-    path('my-registrations',views.MyRegistrationsAPIView.as_view(),name="submission")
-    # path('login', views.LoginAPIView.as_view(), name='login'),
+    path('submit-solution',views.SubmitYourSolutionAPIView.as_view(),name="submit-solution"),
+    path('my-registrations',views.MyRegistrationsAPIView.as_view(),name="registration"),
+    path("my-submissions",views.MySubmissionAPIView.as_view(),name="submissions")
     
 ]
 urlpatterns += static(settings.MEDIA_URL,
