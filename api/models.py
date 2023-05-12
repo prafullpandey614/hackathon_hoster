@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -41,6 +42,16 @@ class Hackathon(models.Model):
 class HackathonParticipant(models.Model):
     participant = models.ForeignKey(Profile,on_delete=models.CASCADE)
     hackathon = models.ForeignKey(Hackathon,on_delete=models.CASCADE)
-    submission_file = models.FileField(upload_to="media/submissions")
     def __str__(self) -> str:
         return f"{self.hackathon}  {self.participant}"
+
+class Submission(models.Model):
+    file = models.FileField(upload_to="media/submission_files/",blank=True,null=True)
+    link_submission = models.URLField(default="https://example.com",blank=True,null=True)
+    participant = models.ForeignKey(Profile,on_delete=models.CASCADE)
+    hackathon = models.ForeignKey(Hackathon,on_delete = models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.hackathon} {self.participant} "
+    
+    

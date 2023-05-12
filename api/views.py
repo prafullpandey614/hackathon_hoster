@@ -1,24 +1,31 @@
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Hackathon, Profile
+from .models import Hackathon, Profile, Submission
 from django.contrib.auth.models import User
-from .serializers import HackathonSerializer, HackthonParticipantSerializer, ProfileSerializer,UserSerializer
+from .serializers import HackathonSerializer, HackthonParticipantSerializer, ProfileSerializer, SubmissionSerializer,UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .models import HackathonParticipant
 from django.shortcuts import get_object_or_404
 # from rest_framework_simplejwt.views import ObtainJSONWebToken
 from django.contrib.auth import login,authenticate
+
+from api import serializers
 # Create your views here.
 
-class OverviewAPIView(APIView):
+class APIOverview(APIView):
     def get(self,request):
         response= {
-            "register" : "/register",
-            "login" : "/login",
+            "Register" : "/register",
+            "Login" : "/login",
+            "Host a Hackathon" : "/host-hackathon",
+            "Register in a Hackathon" : "/participate-hackathon",
+            "Submit your Solution" : "/submit-solution",
+            "My Participation" : "/my-registrations",
+            "My Submissions" :"/my-submissions",
         }
         return Response(response)
 
@@ -61,4 +68,32 @@ class PartcipantHackathonAPIView(CreateAPIView):
         
         participant = Profile.objects.get(user=self.request.user)
         serializer.save(participant=participant, hackathon=hackathon)
+
+class SubmitYourSolutionAPIView(CreateAPIView):
+    queryset = Submission.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SubmissionSerializer
+    def perform_create(self, serializer):
+        print("Running this view function")
+        
+        participant = Profile.objects.get(user=self.request.user)
+        hackathon_id = self.request.data.get('hackathon')
+        if not HackathonParticipant.objects.filter(hackathon=hackathon_id,participant=participant):
+            raise serializers.ValidationError("You are not registered for this event !")
+        serializer.save(participant=participant)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        hackathon_id = self.request.data.get('hackathon')
+        context['hackathon'] = get_object_or_404(Hackathon, pk=hackathon_id)
+        return context
     
+class MyRegistrationsAPIView(ListAPIView):
+    queryset = HackathonParticipant.objects.all()
+    serializer_class = HackthonParticipantSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        user_profile = Profile.objects.get(user = self.request.user)
+        queryset = HackathonParticipant.objects.filter(participant=user_profile)
+        return queryset    

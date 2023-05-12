@@ -9,12 +9,14 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
-    path('',views.OverviewAPIView.as_view()),
+    path('',views.APIOverview.as_view()),
     path('login', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register', views.RegisterAPIView.as_view(), name='register'),
     path('host-hackathon', views.HostHackathonAPIView.as_view(), name='host-hackathon'),
     path('participate-hackathon', views.PartcipantHackathonAPIView.as_view(), name='participate-hackathon'),
+    path('submit-solution',views.SubmitYourSolutionAPIView.as_view(),name="submission"),
+    path('my-registrations',views.MyRegistrationsAPIView.as_view(),name="submission")
     # path('login', views.LoginAPIView.as_view(), name='login'),
     
 ]
