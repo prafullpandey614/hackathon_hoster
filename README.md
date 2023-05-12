@@ -10,6 +10,7 @@
  - Clone the Project
  - Open in Any Code Editor
  - Run the command ``pip install requirements.txt``
+ - Setup the Database
  - Run the Migrations ``python manage.py migrate``
  - Start the Server
  - Use the endpoints Now
